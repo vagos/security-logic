@@ -1,0 +1,32 @@
+Protocol: SeatReservation
+
+Types: Agent A,s,B;
+       Number Request_Seat,ReqID,Confirm_Data;
+       Symmetric_key K;	
+       Function pk,pw,rsa;
+
+Knowledge: 
+       A: A,s,pw(A,s),pk(s),B,pk(B),rsa(pw(A,s));
+       B: B,pk(B),inv(pk(B)),s,pk(s);
+       s: s,pk(s),inv(pk(s)),B,pk(B),A,pw(A,s),rsa(pw(A,s));
+       where B!=s
+#A : customer
+#B : venue server
+#s : trusted third party, such as MitID
+
+Actions:
+
+A->B: {A,B,Request_Seat,K}pk(B) 
+B->A: {|A,s,B,ReqID|}K
+
+A->s:  {| A,s,B,ReqID |}rsa(pw(A,s)) 
+s->B:  { {A,s,B,ReqID }inv(pk(s)) }pk(B)
+
+B->A: {|Request_Seat,Confirm_Data|}K
+
+Goals:
+
+B authenticates A on Request_Seat
+A authenticates B on Confirm_Data
+pw(A,s) guessable secret between A,s
+

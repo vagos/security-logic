@@ -1,0 +1,33 @@
+Protocol: SeatReservation
+
+Types: Agent A,s,B;
+       Number Request_Seat,ReqID,Data,N1;
+       Symmetric_key K;
+       Function pk,pw;
+#Agent A:Customer
+#Agent B:Reservation system
+#Agent s:Venue server
+
+Knowledge: 
+       A: A,s,pw(A,s),pk(s),B,pk(B);
+       B: B,pk(B),inv(pk(B)),s,pk(s);
+       s: s,pk(s),inv(pk(s)),B,pk(B),A,pw(A,s);
+       where B!=s
+#both of the receiving ("request") entities have asymmetric keys.. I.e. the servers
+Actions:
+
+A->B: {A,B,Request_Seat,K}pk(B) 
+B->A: {|A,s,B,ReqID|}K 
+#add the identity of B and req-id from previous session
+#for the second part, add a nonce and encrypt the entire message including password with public key of s
+A->s: { {| A,s,B, ReqID, N1 |}pw(A,s) }pk(s)  
+#add the identity of B and req-id from previous session
+s->B: { {A,s,B, ReqID }inv(pk(s)) }pk(B)  
+
+B->A: {|Request_Seat,Data|}K
+
+Goals:
+
+B authenticates A on Request_Seat
+A authenticates B on Data
+Data secret between B,A
