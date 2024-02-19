@@ -1,33 +1,29 @@
 Protocol: SeatReservation
 
-Types: Agent A,s,B;
-       Number Request_Seat,ReqID,Data,N1;
-       Symmetric_key K;
+Types: Agent Customer,s,Venue;
+       Number RequestSeat,ReqID,Confirmation;
+       Symmetric_key K,KCs;
        Function pk,pw;
-#Agent A:Customer
-#Agent B:Reservation system
-#Agent s:Venue server
 
 Knowledge: 
-       A: A,s,pw(A,s),pk(s),B,pk(B);
-       B: B,pk(B),inv(pk(B)),s,pk(s);
-       s: s,pk(s),inv(pk(s)),B,pk(B),A,pw(A,s);
-       where B!=s
-#both of the receiving ("request") entities have asymmetric keys.. I.e. the servers
+       Customer: Customer,s,pw(Customer,s),pk(s),Venue,pk(Venue);
+       Venue: Venue,pk(Venue),inv(pk(Venue)),s,pk(s);
+       s: s,pk(s),inv(pk(s)),Venue,pk(Venue),Customer,pw(Customer,s);
+       where Venue!=s
+
 Actions:
 
-A->B: {A,B,Request_Seat,K}pk(B) 
-B->A: {|A,s,B,ReqID|}K 
-#add the identity of B and req-id from previous session
-#for the second part, add a nonce and encrypt the entire message including password with public key of s
-A->s: { {| A,s,B, ReqID, N1 |}pw(A,s) }pk(s)  
-#add the identity of B and req-id from previous session
-s->B: { {A,s,B, ReqID }inv(pk(s)) }pk(B)  
+Customer->Venue: {Customer,Venue,RequestSeat,K}pk(Venue) 
+Venue->Customer: {|Customer,s,Venue,ReqID|}K
 
-B->A: {|Request_Seat,Data|}K
+Customer->s:  { {| {| Customer,s,Venue,ReqID |}pw(Customer,s) |}KCs, KCs }pk(s)
+s->Venue:  { {Customer,s,Venue,ReqID }inv(pk(s)) }pk(Venue)
+
+Venue->Customer: {|RequestSeat,Confirmation|}K
 
 Goals:
 
-B authenticates A on Request_Seat
-A authenticates B on Data
-Data secret between B,A
+Venue authenticates Customer on RequestSeat
+Customer authenticates Venue on Confirmation
+Confirmation secret between Venue,Customer
+pw(Customer,s) guessable secret between Customer,s
