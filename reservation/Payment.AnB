@@ -1,0 +1,27 @@
+Protocol: Payment
+
+Types: Agent Customer, Venue, CustomerBank, VenueBank, s;
+       Number PaymentInformation, OrderInformation, PaymentConfirmation;
+       Fuction h,pk,pw;
+
+Knowledge:
+    Customer: Customer, s, pw(Customer, s), Venue, CustomerBank, pk(Venue), pk(s), pk(CustomerBank), h;
+    Venue: Customer, Venue, VenueBank, s, pk(Venue), inv(pk(Venue)), pk(s), h;
+    CustomerBank: Customer, s, pk(s), inv(pk(CustomerBank)), pk(CustomerBank);
+    s: s, pk(s), inv(pk(s)), pw(Customer, s), Customer, Venue, CustomerBank, pk(Venue), pk(CustomerBank), h;
+#   VenueBank: Venue, s, pk(s), inv(pk(VenueBank)), pk(VenueBank), pk(Venue);
+
+Actions:
+
+Customer -> s: {|{PaymentInformation}pk(CustomerBank), OrderInformation|}pw(Customer, s)
+s -> CustomerBank: { {PaymentInformation}pk(CustomerBank), Customer }pk(CustomerBank)
+CustomerBank -> s: { Customer, PaymentConfirmation }pk(s)
+s -> Venue: { Customer, { PaymentConfirmation }pk(Venue), OrderInformation }pk(Venue)
+
+Goals:
+
+Venue authenticates Customer on OrderInformation
+Venue authenticates CustomerBank on PaymentConfirmation
+CustomerBank authenticates Customer on PaymentInformation
+PaymentInformation secret between Customer,CustomerBank
+OrderInformation secret between Customer,Venue
