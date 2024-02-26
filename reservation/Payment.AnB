@@ -1,8 +1,8 @@
 Protocol: Payment
 
-Types: Agent Customer, Venue, CustomerBank, VenueBank, s;
-       Number PaymentInformation, OrderInformation, PaymentConfirmation;
-       Fuction h,pk,pw;
+Types: Agent Customer,Venue,CustomerBank,VenueBank,s;
+       Number PaymentInformation,OrderInformation,PaymentConfirmation;
+       Function h,pk,pw;
 
 Knowledge:
     Customer: Customer, s, pw(Customer, s), Venue, CustomerBank, pk(Venue), pk(s), pk(CustomerBank), h;
@@ -25,3 +25,4 @@ Venue authenticates CustomerBank on PaymentConfirmation
 CustomerBank authenticates Customer on PaymentInformation
 PaymentInformation secret between Customer,CustomerBank
 OrderInformation secret between Customer,Venue
+
