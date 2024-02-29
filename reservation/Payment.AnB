@@ -1,29 +1,33 @@
 Protocol: Payment
 
 Types: Agent Customer, Venue, Bank, s;
-       Number OrderInformation, PaymentInformation, ReqID, Confirmation, NsC, NCs;
+       Number OrderInformation, PaymentInformation, ReqID, Confirmation, NsC, NCs, NsV, X, Y, g;
        Symmetric_key K;
        Function sk, pk, pw, pre;
 
 Knowledge:
     Customer: Customer, s, Venue, pw(Customer, s), pk;
-    Venue: Customer, s, Venue, Bank, pw(Venue, s), inv(pk(Venue)), pk;
+    Venue: Customer, s, Venue, Bank, pw(Venue, s), inv(pk(Venue)), pk, g;
     Bank: Customer, s, Venue, Bank, pw(Bank, s), inv(pk(Bank)), pk(Bank), pk(s), pk(Venue);
-    s: Customer, s, Venue, Bank, pw(Customer, s), pw(Bank, s), pw(Venue, s), pk, inv(pk(s));
-    where Customer != s
+    s: Customer, s, Venue, Bank, pw(Customer, s), pw(Bank, s), pw(Venue, s), pk, inv(pk(s)), g;
+    where Customer != s, Customer != Venue, Customer != Bank
 
 Actions:
 
 s -> Customer: {|NsC|}pw(Customer, s)
 
-Customer -> s: {|Customer, s, Venue, NsC|}pw(Customer, s)
-s -> Customer: {|Customer, s, Venue, Bank, NsC|}pw(Customer, s)
+Customer -> s: {|Customer, s, NsC|}pw(Customer, s)
+s -> Customer: {|Customer, s, Bank, NsC|}pw(Customer, s)
 
 Customer -> s: {|Customer, s, Venue, Bank, NsC, {PaymentInformation}pk(Bank)|}pw(Customer, s)
 s -> Bank: {|Customer, s, Venue, Bank, NsC, {PaymentInformation}pk(Bank)|}pw(Bank, s)
 
 Bank -> s: {|Customer, s, Venue, Bank, NsC, {PaymentConfirmation}inv(pk(Bank))|}pw(Bank, s)
-# s -> Venue: {|Customer, s, Venue, Bank, NsC, {{PaymentConfirmation}inv(pk(Bank))}pk(Venue)|}pw(Venue, s)
+
+# s -> Venue: {s, Venue, exp(g, X)}inv(pk(s))
+# Venue -> s: {s, Venue, exp(g, Y)}inv(pk(Venue))
+
+s -> Venue: {|Customer, s, Venue, Bank, NsC, { {PaymentConfirmation}inv(pk(s)) }pk(Venue)|}pw(Venue, s)
 
 Goals:
 Customer weakly authenticates s on Bank
@@ -31,4 +35,4 @@ Bank weakly authenticates Customer on PaymentInformation
 s authenticates Bank on PaymentConfirmation
 
 PaymentInformation secret between Customer, Bank
-# PaymentConfirmation secret between s, Bank, Venue
+PaymentConfirmation secret between Bank, Venue
