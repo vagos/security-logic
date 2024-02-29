@@ -6,24 +6,29 @@ Types: Agent Customer, Venue, Bank, s;
        Function sk, pk, pw, pre;
 
 Knowledge:
-    Customer: Customer, s, Venue, pw(Customer, s), pk(Venue), pk(s);
-    Venue: Customer, s, Venue, Bank, pw(Venue, s);
+    Customer: Customer, s, Venue, pw(Customer, s), pk;
+    Venue: Customer, s, Venue, Bank, pw(Venue, s), inv(pk(Venue)), pk;
     Bank: Customer, s, Venue, Bank, pw(Bank, s), inv(pk(Bank)), pk(Bank), pk(s), pk(Venue);
-    s: Customer, s, Venue, Bank, pw(Customer, s), pw(Bank, s), pw(Venue, s), pk(Bank), pk(s), pk(Venue), inv(pk(s));
+    s: Customer, s, Venue, Bank, pw(Customer, s), pw(Bank, s), pw(Venue, s), pk, inv(pk(s));
     where Customer != s
 
 Actions:
 
 s -> Customer: {|NsC|}pw(Customer, s)
 
-Customer -> s: {|Customer, s, Venue, PaymentInformation, NsC|}pw(Customer, s)
+Customer -> s: {|Customer, s, Venue, NsC|}pw(Customer, s)
 s -> Customer: {|Customer, s, Venue, Bank, NsC|}pw(Customer, s)
-Customer -> s: {|Customer, s, Venue, PaymentInformation, Bank, NsC|}pw(Customer, s)
 
-# s -> Bank: {|{Customer, s, Venue}inv(pk(s)),{PaymentInformation}pk(Bank), ReqID|}pw(Bank, s)
-# Bank -> Venue: {|Customer, s, Venue, Confirmation|}pk(Venue)
+Customer -> s: {|Customer, s, Venue, Bank, NsC, {PaymentInformation}pk(Bank)|}pw(Customer, s)
+s -> Bank: {|Customer, s, Venue, Bank, NsC, {PaymentInformation}pk(Bank)|}pw(Bank, s)
+
+Bank -> s: {|Customer, s, Venue, Bank, NsC, {PaymentConfirmation}inv(pk(Bank))|}pw(Bank, s)
+# s -> Venue: {|Customer, s, Venue, Bank, NsC, {{PaymentConfirmation}inv(pk(Bank))}pk(Venue)|}pw(Venue, s)
 
 Goals:
-PaymentInformation secret between Customer,s
 Customer weakly authenticates s on Bank
-s authenticates Customer on PaymentInformation
+Bank weakly authenticates Customer on PaymentInformation
+s authenticates Bank on PaymentConfirmation
+
+PaymentInformation secret between Customer, Bank
+# PaymentConfirmation secret between s, Bank, Venue
