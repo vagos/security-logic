@@ -1,0 +1,17 @@
+Protocol: Entrance
+
+Types: Agent Customer, venue;
+       Number SeatConfirmation, NvC;
+       Function pk, pw;
+
+Knowledge:
+    Customer: Customer, venue, pk(venue), pw(Customer, venue);
+    venue: Customer, pk(venue), inv(pk(venue)), pw(Customer, venue);
+
+Actions:
+    venue -> Customer: {|NvC|}pw(Customer, venue)
+    Customer -> venue: {Customer, venue, SeatConfirmation, NvC}pk(venue)
+
+Goals:
+venue authenticates Customer on SeatConfirmation
+SeatConfirmation secret between Customer, venue
