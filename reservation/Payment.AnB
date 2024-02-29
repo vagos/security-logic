@@ -3,26 +3,27 @@ Protocol: Payment
 Types: Agent Customer, Venue, Bank, s;
        Number OrderInformation, PaymentInformation, ReqID, Confirmation, NsC, NCs;
        Symmetric_key K;
-       Function sk, pk, pw;
+       Function sk, pk, pw, pre;
 
 Knowledge:
     Customer: Customer, s, Venue, pw(Customer, s), pk(Venue), pk(s);
     Venue: Customer, s, Venue, Bank, pw(Venue, s);
     Bank: Customer, s, Venue, Bank, pw(Bank, s), inv(pk(Bank)), pk(Bank), pk(s), pk(Venue);
     s: Customer, s, Venue, Bank, pw(Customer, s), pw(Bank, s), pw(Venue, s), pk(Bank), pk(s), pk(Venue), inv(pk(s));
+    where Customer != s
 
 Actions:
 
-s -> Customer: NsC
+s -> Customer: {|NsC|}pw(Customer, s)
 
-Customer -> s: {|Customer, s, Venue, PaymentInformation|}pw(Customer, s), NsC
-s -> Customer: {|Customer, s, Venue, Bank|}pw(Customer, s), NsC
-Customer -> s: {|Customer, s, Venue, PaymentInformation, Bank|}pw(Customer, s), NsC
+Customer -> s: {|Customer, s, Venue, PaymentInformation, NsC|}pw(Customer, s)
+s -> Customer: {|Customer, s, Venue, Bank, NsC|}pw(Customer, s)
+Customer -> s: {|Customer, s, Venue, PaymentInformation, Bank, NsC|}pw(Customer, s)
 
 # s -> Bank: {|{Customer, s, Venue}inv(pk(s)),{PaymentInformation}pk(Bank), ReqID|}pw(Bank, s)
 # Bank -> Venue: {|Customer, s, Venue, Confirmation|}pk(Venue)
 
 Goals:
 PaymentInformation secret between Customer,s
-Customer authenticates s on Bank
+Customer weakly authenticates s on Bank
 s authenticates Customer on PaymentInformation
