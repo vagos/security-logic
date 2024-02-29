@@ -36,6 +36,7 @@ Venue weakly authenticates s on PaymentConfirmation
 
 exp(exp(g,X),Y) secret between s,Venue
 PaymentInformation secret between Customer, Bank
-#PaymentConfirmation secret between s, Bank, Venue
+PaymentConfirmation secret between s, Bank, Venue
+
 
 
