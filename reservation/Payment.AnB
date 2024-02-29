@@ -1,28 +1,24 @@
 Protocol: Payment
 
-Types: Agent Customer,Venue,CustomerBank,VenueBank,s;
-       Number PaymentInformation,OrderInformation,PaymentConfirmation;
-       Function h,pk,pw;
+Types: Agent Customer, Venue, Bank, s;
+       Number OrderInformation, PaymentInformation, ReqID, Confirmation;
+       Symmetric_key K;
+       Function sk, pk, pw;
 
 Knowledge:
-    Customer: Customer, s, pw(Customer, s), Venue, CustomerBank, pk(Venue), pk(s), pk(CustomerBank), h;
-    Venue: Customer, Venue, VenueBank, s, pk(Venue), inv(pk(Venue)), pk(s), h;
-    CustomerBank: Customer, s, pk(s), inv(pk(CustomerBank)), pk(CustomerBank);
-    s: s, pk(s), inv(pk(s)), pw(Customer, s), Customer, Venue, CustomerBank, pk(Venue), pk(CustomerBank), h;
-#   VenueBank: Venue, s, pk(s), inv(pk(VenueBank)), pk(VenueBank), pk(Venue);
+    Customer: Customer, s, Venue, pw(Customer, s), pk(Venue), pk(s);
+    Venue: Customer, s, Venue, Bank, pw(Venue, s);
+    Bank: Customer, s, Venue, Bank, pw(Bank, s), inv(pk(Bank)), pk(Bank), pk(s), pk(Venue);
+    s: Customer, s, Venue, Bank, pw(Customer, s), pw(Bank, s), pw(Venue, s), pk(Bank), pk(s), pk(Venue), inv(pk(s));
 
 Actions:
 
-Customer -> s: {|{PaymentInformation}pk(CustomerBank), OrderInformation|}pw(Customer, s)
-s -> CustomerBank: { {PaymentInformation}pk(CustomerBank), Customer }pk(CustomerBank)
-CustomerBank -> s: { Customer, PaymentConfirmation }pk(s)
-s -> Venue: { Customer, { PaymentConfirmation }pk(Venue), OrderInformation }pk(Venue)
+Customer -> s: {|Customer, s, Venue, PaymentInformation|}pw(Customer, s)
+s -> Customer: {|Customer, s, Venue, Bank, ReqID|}pw(Customer, s)
+Customer -> s: {|Customer, s, Venue, PaymentInformation, Bank, ReqID|}pw(Customer, s)
+s -> Bank: {|{Customer, s, Venue}inv(pk(s)),{PaymentInformation}pk(Bank), ReqID|}pw(Bank, s)
+Bank -> Venue: {|Customer, s, Venue, Confirmation|}pk(Venue)
 
 Goals:
-
-Venue authenticates Customer on OrderInformation
-Venue authenticates CustomerBank on PaymentConfirmation
-CustomerBank authenticates Customer on PaymentInformation
-PaymentInformation secret between Customer,CustomerBank
-OrderInformation secret between Customer,Venue
-
+PaymentInformation secret between Customer,Bank,s
+Bank authenticates Customer on PaymentInformation
