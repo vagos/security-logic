@@ -14,4 +14,5 @@ Actions:
 
 Goals:
 venue authenticates Customer on SeatConfirmation
-SeatConfirmation secret between Customer, venue
+SeatConfirmation, Customer secret between Customer, venue
+pw(Customer,s) guessable secret between Customer,s
