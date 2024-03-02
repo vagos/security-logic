@@ -2,7 +2,7 @@ Protocol: SeatReservation
 
 Types: Agent Customer,s,Venue;
        Number RequestSeat,ReqID,Confirmation;
-       Symmetric_key K,KCs;
+       Symmetric_key KCV,KCs;
        Function pk,pw;
 
 Knowledge: 
@@ -13,17 +13,18 @@ Knowledge:
 
 Actions:
 
-Customer->Venue: {Customer,Venue,RequestSeat,K}pk(Venue) 
-Venue->Customer: {|Customer,s,Venue,ReqID|}K
+Customer->Venue: {Customer,Venue,RequestSeat,KCV}pk(Venue) 
+Venue->Customer: {|Customer,s,Venue,ReqID|}KCV
 
 Customer->s:  { {| {| Customer,s,Venue,ReqID |}pw(Customer,s) |}KCs, KCs }pk(s)
 s->Venue:  { {Customer,s,Venue,ReqID }inv(pk(s)) }pk(Venue)
 
-Venue->Customer: {|RequestSeat,Confirmation|}K
+Venue->Customer: {|RequestSeat,Confirmation|}KCV
 
 Goals:
 
 Venue authenticates Customer on RequestSeat
 Customer authenticates Venue on Confirmation
 Confirmation secret between Venue,Customer
+KCs secret between Customer,s
 pw(Customer,s) guessable secret between Customer,s
