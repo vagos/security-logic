@@ -27,4 +27,5 @@ Venue authenticates Customer on RequestSeat
 Customer authenticates Venue on Confirmation
 Confirmation secret between Venue,Customer
 KCs secret between Customer,s
+KCV secret between Customer, Venue
 pw(Customer,s) guessable secret between Customer,s
