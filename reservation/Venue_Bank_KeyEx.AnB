@@ -1,0 +1,24 @@
+Protocol: Venue_Bank_KeyEx
+
+Types: Agent A,B,s;
+       Number g,X,Y,Msg;
+       Function pk;
+
+Knowledge: 
+       A: A,B,s,pk(B),pk(s),g,sk(A,s);
+       B: A,B,s,pk(B),inv(pk(B)),pk(s),g,sk(B,s);
+       s: A,B,s,pk(s),inv(pk(s)),pk(B),g,sk(B,s),sk(A,s);
+
+Actions:
+
+A->B: {A,B,exp(g,X)}pk(B)
+B->s: {| A,B,exp(g,X),exp(g,Y) |}sk(B,s)
+s->A: {| A,B,exp(g,X),exp(g,Y) |}sk(A,s)
+A->B: {| Msg |}exp(exp(g,X),Y)
+
+Goals:
+
+Msg secret between A,B
+B authenticates A on Msg
+
+

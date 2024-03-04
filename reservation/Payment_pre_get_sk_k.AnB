@@ -1,0 +1,33 @@
+Protocol: Payment
+
+Types:
+  Agent Customer,CustomerBank,Venue,s;
+  Number PayApproval,OrderInfo,PaymentInfo,PaymentConfirmation;
+  Function pw,sk,pk;
+
+Knowledge:
+  Customer: Customer,CustomerBank,s,pw(Customer,s);
+  CustomerBank: Customer,CustomerBank,Venue,s,sk(CustomerBank,s),sk(CustomerBank,Venue),pk(Venue);
+  Venue: Customer,CustomerBank,Venue,s,pk(Venue),sk(Venue,s),sk(CustomerBank,Venue);
+  s: Venue,Customer,CustomerBank,s,pw(Customer,s),sk(CustomerBank,s),sk(Venue,s)
+  
+  where Customer!=CustomerBank
+
+Actions:
+
+Venue -> CustomerBank : Venue,CustomerBank,PaymentInfo
+CustomerBank->Customer: CustomerBank,Customer,OrderInfo,PaymentInfo
+Customer->s: Customer,CustomerBank,PayApproval,OrderInfo,PaymentInfo
+s->Customer: {| PaymentConfirmation,Customer,CustomerBank,PayApproval,PaymentInfo |}pw(Customer,s), {| PaymentConfirmation,Customer,CustomerBank,OrderInfo,PaymentInfo |}sk(CustomerBank,s)
+Customer->CustomerBank: {| PaymentConfirmation,Customer,CustomerBank,OrderInfo,PaymentInfo |}sk(CustomerBank,s)
+CustomerBank->Venue: {{| PaymentConfirmation,Customer,CustomerBank,OrderInfo,PaymentInfo |}sk(CustomerBank,Venue)}pk(Venue)
+
+ 
+Goals: 
+
+Customer authenticates s on PaymentConfirmation,CustomerBank
+CustomerBank authenticates s on PaymentConfirmation,Customer
+PaymentConfirmation secret between Customer,CustomerBank,s
+
+
+
