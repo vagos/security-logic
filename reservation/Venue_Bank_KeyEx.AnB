@@ -1,24 +1,24 @@
 Protocol: Venue_Bank_KeyEx
 
-Types: Agent A,B,s;
+Types: Agent CustomerBank,Venue,s;
        Number g,X,Y,Msg;
        Function pk;
 
 Knowledge: 
-       A: A,B,s,pk(B),pk(s),g,sk(A,s);
-       B: A,B,s,pk(B),inv(pk(B)),pk(s),g,sk(B,s);
-       s: A,B,s,pk(s),inv(pk(s)),pk(B),g,sk(B,s),sk(A,s);
+       CustomerBank: CustomerBank,Venue,s,pk(Venue),pk(s),g,sk(CustomerBank,s);
+       Venue: CustomerBank,Venue,s,pk(Venue),inv(pk(Venue)),pk(s),g,sk(Venue,s);
+       s: CustomerBank,Venue,s,pk(s),inv(pk(s)),pk(Venue),g,sk(Venue,s),sk(CustomerBank,s);
 
 Actions:
 
-A->B: {A,B,exp(g,X)}pk(B)
-B->s: {| A,B,exp(g,X),exp(g,Y) |}sk(B,s)
-s->A: {| A,B,exp(g,X),exp(g,Y) |}sk(A,s)
-A->B: {| Msg |}exp(exp(g,X),Y)
+CustomerBank->Venue: {CustomerBank,Venue,exp(g,X)}pk(Venue)
+Venue->s: {| CustomerBank,Venue,exp(g,X),exp(g,Y) |}sk(Venue,s)
+s->CustomerBank: {| CustomerBank,Venue,exp(g,X),exp(g,Y) |}sk(CustomerBank,s)
+CustomerBank->Venue: {| Msg |}exp(exp(g,X),Y)
 
 Goals:
 
-Msg secret between A,B
-B authenticates A on Msg
+Msg secret between CustomerBank,Venue
+Venue authenticates CustomerBank on Msg
 
 
