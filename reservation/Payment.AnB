@@ -1,28 +1,30 @@
 Protocol: Payment
 
-Types: Agent Customer,Venue,CustomerBank,VenueBank,s;
-       Number PaymentInformation,OrderInformation,PaymentConfirmation;
-       Function h,pk,pw;
+Types: Agent Customer,Bank,Venue;
+       Number OrderInfo,ReqID,Ticket, PaymentConfirmation;
+       Symmetric_key K,KCs;
+       Function pk,pw;
 
-Knowledge:
-    Customer: Customer, s, pw(Customer, s), Venue, CustomerBank, pk(Venue), pk(s), pk(CustomerBank), h;
-    Venue: Customer, Venue, VenueBank, s, pk(Venue), inv(pk(Venue)), pk(s), h;
-    CustomerBank: Customer, s, pk(s), inv(pk(CustomerBank)), pk(CustomerBank);
-    s: s, pk(s), inv(pk(s)), pw(Customer, s), Customer, Venue, CustomerBank, pk(Venue), pk(CustomerBank), h;
-#   VenueBank: Venue, s, pk(s), inv(pk(VenueBank)), pk(VenueBank), pk(Venue);
+Knowledge: 
+       Customer: Customer,Bank,pw(Customer,Bank),pk(Bank),Venue,pk(Venue);
+       Venue: Venue,pk(Venue),inv(pk(Venue)),Bank,pk(Bank);
+       Bank: Bank,pk(Bank),inv(pk(Bank)),Venue,pk(Venue),Customer,pw(Customer,Bank);
+       where Venue!=Bank
 
 Actions:
 
-Customer -> s: {|{PaymentInformation}pk(CustomerBank), OrderInformation|}pw(Customer, s)
-s -> CustomerBank: { {PaymentInformation}pk(CustomerBank), Customer }pk(CustomerBank)
-CustomerBank -> s: { Customer, PaymentConfirmation }pk(s)
-s -> Venue: { Customer, { PaymentConfirmation }pk(Venue), OrderInformation }pk(Venue)
+Customer *->* Venue: Customer,Venue, K,OrderInfo
+
+Venue->Customer: {|Customer,Venue,ReqID|}K
+
+Customer->Bank:  { {|Customer,Bank,Venue,ReqID |}pw(Customer,Bank)}pk(Bank)
+Bank->Venue:  { {Customer,Bank,Venue,ReqID, PaymentConfirmation }inv(pk(Bank)) }pk(Venue)
+
+Venue->Customer: {| OrderInfo,{Ticket}inv(pk(Venue))|}K
 
 Goals:
 
-Venue authenticates Customer on OrderInformation
-Venue authenticates CustomerBank on PaymentConfirmation
-CustomerBank authenticates Customer on PaymentInformation
-PaymentInformation secret between Customer,CustomerBank
-OrderInformation secret between Customer,Venue
-
+Venue authenticates Customer on OrderInfo
+Customer authenticates Venue on Ticket
+Ticket secret between Venue,Customer
+#pw(Customer,s) guessable secret between Customer,s
