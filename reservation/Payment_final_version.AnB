@@ -1,0 +1,33 @@
+Protocol: Payment
+
+Types: Agent Customer,Bank,Venue;
+       Number OrderInfo_signed_by_ttp,PaymentRequest,Ticket,PaymentConfirmation,Credentials;
+       Symmetric_key K,KCs;
+       Function pk,pw;
+
+Knowledge: 
+       Customer: Customer,Bank,pw(Customer,Bank),pk(Bank),Venue,pk(Venue);
+       Venue: Venue,pk(Venue),inv(pk(Venue)),Bank,pk(Bank);
+       Bank: Bank,pk(Bank),inv(pk(Bank)),Venue,pk(Venue),Customer,pw(Customer,Bank);
+       where Venue!=Bank
+
+Actions:
+
+# Accountability protocol is here
+
+Customer *->* Venue: Customer,Venue, K, OrderInfo_signed_by_ttp # , {hash(OrderInfo)}inv(pk(ttp))
+
+Venue->Customer: {|Customer,Venue,PaymentRequest|}K
+
+Customer->Bank:  { {|Customer,Bank,Venue,PaymentRequest, {Credentials}pk(Bank) |}pw(Customer,Bank)}pk(Bank)
+Bank->Venue:  { {Customer,Bank,Venue,PaymentRequest, PaymentConfirmation }inv(pk(Bank)) }pk(Venue)
+
+Venue->Customer: {|{Ticket}inv(pk(Venue))|}K
+
+Goals:
+
+Venue authenticates Customer on OrderInfo_signed_by_ttp
+Customer authenticates Venue on Ticket
+Ticket secret between Venue,Customer
+
+
