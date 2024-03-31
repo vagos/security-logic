@@ -13,9 +13,9 @@ Knowledge:
 
 Actions:
 
-# Accountability protocol is here
+# <Accountability protocol is run here>
 
-Customer *->* Venue: Customer,Venue, K, OrderInfo_signed_by_ttp # , {hash(OrderInfo)}inv(pk(ttp))
+Customer *->* Venue: Customer,Venue, K, OrderInfo_signed_by_ttp
 
 Venue->Customer: {|Customer,Venue,PaymentRequest|}K
 
@@ -29,5 +29,3 @@ Goals:
 Venue authenticates Customer on OrderInfo_signed_by_ttp
 Customer authenticates Venue on Ticket
 Ticket secret between Venue,Customer
-
-

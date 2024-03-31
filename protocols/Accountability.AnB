@@ -1,4 +1,4 @@
-Protocol: Accountability
+Protocol: Accountabilitys
 
 Types: Agent Customer, Bank, ttp;
        Number NtC, OrderInfo, NCt;
@@ -15,7 +15,7 @@ Actions:
 ttp -> Customer: NtC
 Customer -> ttp: Customer, ttp, NCt, NtC
 
-ttp -> Customer: {|NCt, NtC, Customer, ttp|}pw(Customer, ttp)
+ttp -> Customer: {NCt, NtC, {|Customer|}ttp, ttp}pw(Customer, ttp)
 Customer -> ttp: {|NCt, NtC, Customer, ttp, hash(OrderInfo)|}pw(Customer, ttp)
 ttp -> Customer: {|NCt, NtC, Customer, ttp, {hash(OrderInfo)}inv(pk(ttp))|}pw(Customer, ttp)
 
@@ -23,3 +23,5 @@ Goals:
 
 pw(Customer, ttp) secret between Customer, ttp
 Customer authenticates ttp on NtC
+ttp authenticates Customer on hash(OrderInfo)
+OrderInfo secret between Customer
