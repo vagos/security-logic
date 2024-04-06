@@ -15,17 +15,6 @@ class AuctionHouse():
         self.bid_step = bid_step
 
 
-auction_house = AuctionHouse("Units Auction House")
-bidder_a = Customer("Bidder A", 500, commisioned=True)
-bidder_b = Customer("Bidder B", 700, commisioned=True)
-bidder_c = Customer("Bidder C", 1000, commisioned=False)
-bidder_d = Customer("Bidder D", 2000, commisioned=False)  # Another live bidder for the example
-auction_house.customers.extend([bidder_a, bidder_b, bidder_c])
-
-auction_house.current_bid = 500
-print(f"Starting the auction at {auction_house.current_bid} Units!")
-
-
 def doLiveCustomerBid(customer, auction_house):
     if customer.max_bid >= auction_house.current_bid + auction_house.bid_step:
         auction_house.current_bid += auction_house.bid_step
@@ -76,4 +65,19 @@ def simulate_auction(auction_house):
             break
 
 
-simulate_auction(auction_house)
+def main():
+
+    auction_house = AuctionHouse("Units Auction House")
+    bidder_a = Customer("Bidder A", 500, commisioned=True)
+    bidder_b = Customer("Bidder B", 700, commisioned=True)
+    bidder_c = Customer("Bidder C", 1000, commisioned=False)
+    # bidder_d = Customer("Bidder D", 2000, commisioned=False)  # Another live bidder for the example
+    auction_house.customers.extend([bidder_a, bidder_b, bidder_c])
+
+    auction_house.current_bid = 500
+    print(f"Starting the auction at {auction_house.current_bid} Units!")
+
+    simulate_auction(auction_house)
+
+
+main()
