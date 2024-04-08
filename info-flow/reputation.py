@@ -2,6 +2,7 @@ class Customer:
     def __init__(self, name, bid_limit=100):
         self.name = name
         self.bid_limit = bid_limit
+        self.reference = ""
 
 
 class AuctionHouse:
@@ -56,6 +57,8 @@ def main():
     auction_house_c.set_auction_house_trust("AuctionHouseB", auction_house_b.verify_customer_bid_limit)
 
     # Verifying Alice's bid limit through references
+
+    # This is run by the customer
     auction_house_b.accept_customer_with_reference("Alice", "AuctionHouseA")
     auction_house_c.accept_customer_with_reference("Alice", "AuctionHouseB")
     auction_house_b.accept_customer_with_reference("Bob", "AuctionHouseA")
