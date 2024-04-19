@@ -55,6 +55,9 @@ def simulate_auction(auction_house):
         # Determine if any bidder can still bid
         potential_bidders = [c for c in auction_house.customers if c.max_bid >= next_possible_bid]
         # what if c.max_bid is from live customer? isn't the auction house not allowed to read that?
+        #live_bid :int {⊥}
+        #if_acts_for(simulate_auction, live_customer)
+            #live_bid := declassify(live_customer.max_bid, {auctionHouse?})
 
         if not potential_bidders:
             print("No bidder can continue.")
@@ -96,7 +99,6 @@ def simulate_auction(auction_house):
             # however
             # we the set is { A: {C_winner } }
             break
-
 
 def main():
 
