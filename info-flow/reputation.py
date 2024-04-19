@@ -1,23 +1,3 @@
-class Security_Label:
-    def __init__(self):
-        self.label = ""
-        self.owner = [] 
-        self.reader = []
-    
-    def add_owner(self, owner):
-        self.owner.append(owner)
-    
-    def add_reader(self, reader):
-        self.reader.append(reader)
-    
-    def set_sec_label(self):
-        ownset = ' '.join(self.owner)
-        readset = ' '.join(self.reader)
-        label = f"{ownset} : {readset}"
-        self.label = label
-    def get_sec_label(self):
-        return f"{{{self.label}}}"
-
 class Customer:
     def __init__(self, name, bid_limit=100):
         self.name = name #{Customer : AuctionHouse}
@@ -27,22 +7,29 @@ class Customer:
 
 class AuctionHouse:
     def __init__(self, name):
-        self.name = name #{AuctionHouse : {AuctionHouse,Customer}}
+        self.name = name #{AuctionHouse : {⊥}}
         self.customers = {} #{AuctionHouse : AuctionHouse}
         # Instead of holding auction house objects, we use a mapping of names to verification methods
         self.trusted_auction_houses = {} #{AuctionHouse : {AuctionHouse}}
+        # we seem to miss customer reference, check google docs
+        self.customer_reference = [] #{AuctionHouse : {Customer,AuctionHouse}}
 
     def add_customer(self, name, bid_limit=100):
         self.customers[name] = Customer(name, bid_limit) #{Customer : AuctionHouse}.
-        # "name" : The name of customer, auctionhouse can read. 
-        # "bid_limit" : auctionhouse is owner.
+        # self.customers[name] : {AuctionHouse : AuctionHouse}
+        # Customer(name, bid_limit) : "name" : {Custome: AuctionHouse},so auctionhouse can read. "bid_limit" : auctionhouse is owner.
 
     def set_auction_house_trust(self, auction_house_name, verification_method):
         self.trusted_auction_houses[auction_house_name] = verification_method #{AuctionHouse : {AuctionHouse}}
+        # auction_house_name : {AuctionHouse : {⊥}}, everyone can read auction house name
+        # we use customer's bid limit as verification method, the bid limit : {AuctionHouse : {Customer,AuctionHouse}}, so auction house can read customer's bid limit
+
 
     def verify_customer_bid_limit(self, customer_name):
         # customer_name : {Customer : AuctionHouse}
         # self.customers[customer_name].bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
+        # the parameter of customer_name : {Customer : AuctionHouse}, therefore auction house can read customer's bid limit
+        # here, we have the implicit information flow from customer's name to auction house's customer list where the customer's bid limit is stored
         if customer_name in self.customers:
             return self.customers[customer_name].bid_limit #{AuctionHouse : {Customer,AuctionHouse}}
         else:
@@ -55,10 +42,17 @@ class AuctionHouse:
         # verification_method : {AuctionHouse : {AuctionHouse}}
         # bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
         if reference_auction_house_name in self.trusted_auction_houses:
+            # reference_auction_house_name : {AuctionHouse : {AuctionHouse}}, so auction house can read the reference auction house name
+            # self.trusted_auction_houses : {AuctionHouse : {AuctionHouse}}, so auction house can read the trusted auction houses
             verification_method = self.trusted_auction_houses[reference_auction_house_name]
+            # verification_method : {AuctionHouse : {AuctionHouse}}
             bid_limit = verification_method(customer_name)
+            # customer_name : {Customer : AuctionHouse}, so auction house can read the customer's name
+            # implicitly, we have the information flow from customer's name to auction house's customer list where the customer's bid limit is stored
             if bid_limit is not None:
+                # bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
                 self.add_customer(customer_name, bid_limit)
+                # auction house stores the customer's name and bid limit
                 print(f"{customer_name} has been accepted with a bid limit of {bid_limit} based on their status from {reference_auction_house_name}.")
             else:
                 print(f"{customer_name} is not a customer of {reference_auction_house_name}.")
@@ -68,17 +62,26 @@ class AuctionHouse:
     def print_customers(self):
         for customer in self.customers.values():
             print(f"Customer: {customer.name}, Bid Limit: {customer.bid_limit}") # customer.name : {Customer : AuctionHouse}, customer.bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
-
+        # auction house can read the customer's name and bid limit, information flow from customer's name to auction house's customer list, check there exists the same customer, print the customer's name and bid limit
 
 def main():
 
+    # Suggestion : we may stand on only one auction house's perspective, and consider the information flow from the auction house's perspective
+    # For example, a trust c, a trust b, a trust d. now, we have b trust a, c trust b. 
+    # Because the data from other auction houses is not directly accessible, it would be more clear that which auction house is the main focus of the analysis.
+
     # Setup
+
     auction_house_a = AuctionHouse("AuctionHouseA") # {AuctionHouse : {AuctionHouse,Customer}}
     auction_house_b = AuctionHouse("AuctionHouseB") # {AuctionHouse : {AuctionHouse,Customer}}
     auction_house_c = AuctionHouse("AuctionHouseC") # {AuctionHouse : {AuctionHouse,Customer}}
 
+    # Consider declassfy the customer's name and bid limit. Customer provides the name and bid limit, auction house stores the customer's name and bid limit
     auction_house_a.add_customer("Alice", 500) # {Customer : AuctionHouse}
 
+    # With regard to the trust auction house, each auction house trusts the other auction house. 
+    # Although the auction house name is public, the verification method (bid limit) is private.
+    # And essentially, the auction house only knows their owned customer bid limit. therefore, we may also consider the declassification of bid limit from other auction houses
     # B trusts A by specifying A's verification method
     auction_house_b.set_auction_house_trust("AuctionHouseA", auction_house_a.verify_customer_bid_limit) # {AuctionHouse : {AuctionHouse}}
 
@@ -87,20 +90,17 @@ def main():
 
     # Verifying Alice's bid limit through references
 
-    # This is run by the customer
+    # This is run by the customer   Q: why is run by customer? 
+    # auction house b accepts the auction house a's customer, Alice, with the reference of auction house a
     auction_house_b.accept_customer_with_reference("Alice", "AuctionHouseA") #"Alice" : {Customer : AuctionHouse}, "AuctionHouseA" : {AuctionHouse : {AuctionHouse}}
+    # auction house c accepts the auction house b's customer, Alice, with the reference of auction house b
     auction_house_c.accept_customer_with_reference("Alice", "AuctionHouseB") #"Alice" : {Customer : AuctionHouse}, "AuctionHouseB" : {AuctionHouse : {AuctionHouse}}
+    # auction house b accepts the auction house a's customer, Bob, with the reference of auction house a
     auction_house_b.accept_customer_with_reference("Bob", "AuctionHouseA")   #"Bob" : {Customer : AuctionHouse}, "AuctionHouseA" : {AuctionHouse : {AuctionHouse}}
 
+    # auction house b prints the customer's reference from aution house a
     auction_house_b.print_customers()   # {AuctionHouse : {AuctionHouse}}
+    # auction house c prints the customer's reference from aution house b
     auction_house_c.print_customers()   # {AuctionHouse : {AuctionHouse}}
-
-    # Security Label testing
-    sc = Security_Label()
-    sc.add_owner("AuctionHouseA")
-    sc.add_reader("AuctionHouseB")
-    sc.set_sec_label()
-    label = sc.get_sec_label()
-    print("Variable : sc, Label : ", label)
 
 main()
