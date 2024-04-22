@@ -97,7 +97,7 @@ def simulate_auction(auction_house):
             print(f"The winner is {winner.name}")
             # winner.name : {A:{⊥}}
             # however
-            # we the set is { A: {C_winner } }
+            # we labelled the set as { A: {C_winner } }
             break
 
 def main():
