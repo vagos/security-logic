@@ -26,7 +26,6 @@ def doesCommisionedCustomerRaiseBid(customer, auction_house):
         # customer.commisioned = {A:{A}}
         # commisioned_customer.max_bid = {C:A,C}
         # current_bid : { A: {A, C_live}}
-        # the value of the above depends on the condtional statement with data that violates the set of readers set initially
         print(f"Auction house bids for {customer.name}: {auction_house.current_bid} Units")
         doesRaiseBid = True
     return doesRaiseBid
