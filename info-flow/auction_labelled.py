@@ -28,6 +28,11 @@ def doLiveCustomerBid(customer, auction_house):
         # there is a reader in violation of the set
         # declassification required?
         print(f"{customer.name} bids {auction_house.current_bid} Units")
+        #to prevent the violation of iflow :
+        #first declare : i:int{⊥} := 0 #not sure about this
+        #if the conditional statement is true:
+        #if_acts_for(doLiveCustomerBid, customer) #doLiveCustomer program acts on behalf of the live customer
+        #i:= declassify(customer.max_bid, {auction_house})
         return True
     return False
 
@@ -81,7 +86,7 @@ def simulate_auction(auction_house):
         for customer in sorted(potential_bidders, key=lambda x: x.max_bid, reverse=True):
             # customer : {A:{A}}
             # potential bidders : {A:{A}}
-            raisesBid = doCommissionedCustomerBid(customer, auction_house)
+            raisesBid = doCommissionedCustomerBid(customer, auction_house) 
             if raisesBid:
                 # declassify(raisesBid, {⊥})
                 auction_house.current_bid += auction_house.bid_step
