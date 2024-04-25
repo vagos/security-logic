@@ -2,7 +2,7 @@ class Customer:
     def __init__(self, name, bid_limit=None):
         self.name = name #{Customer :{Customer,AuctionHouse}}
         self.bid_limit = bid_limit  #{Customer : {Customer,AuctionHouse}}
-        #self.reference = "" #{AuctionHouse : {Customer,AuctionHouse}}
+    
 
 
 class AuctionHouse:
@@ -25,33 +25,29 @@ class AuctionHouse:
 
 
     def verify_customer_bid_limit(self, customer_name):
-        # customer_name : {Customer : AuctionHouse}
-        # self.customers[customer_name].bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
-        # the parameter of customer_name : {Customer : AuctionHouse}, therefore auction house can read customer's bid limit
-        # here, we have the implicit information flow from customer's name to auction house's customer list where the customer's bid limit is stored
+        # customer_name : {Customer : {Customer,AuctionHouse}}
+        # self.customers[customer_name].bid_limit : {AuctionHouse' : {Customer,AuctionHouse'}}
+        # This step involves some auction house reading customers' bid_limit from other trusted auction houses, which is declassified in the main method.
         if customer_name in self.customers:
-            return self.customers[customer_name].bid_limit #{AuctionHouse : {Customer,AuctionHouse}}
+            return self.customers[customer_name].bid_limit #{AuctionHouse' : {AuctionHouse'}}
         else:
-            return None #{⊥}
+            return None # {AuctionHouse' : {AuctionHouse'}}
 
     def accept_customer_with_reference(self, customer_name, reference_auction_house_name):
         # customer_name : {Customer : AuctionHouse}
-        # reference_auction_house_name : {AuctionHouse : {AuctionHouse}}
-        # trusted_auction_houses : {AuctionHouse : {AuctionHouse}}
+        # reference_auction_house_name : {AuctionHouse' : {AuctionHouse'}}
+        # self.trusted_auction_houses : {AuctionHouse' : {AuctionHouse'}}
         # verification_method : {AuctionHouse : {AuctionHouse}}
-        # bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
+        # bid_limit : {AuctionHouse' : {Customer,AuctionHouse'}}
         if reference_auction_house_name in self.trusted_auction_houses:
-            # reference_auction_house_name : {AuctionHouse : {AuctionHouse}}, so auction house can read the reference auction house name
-            # self.trusted_auction_houses : {AuctionHouse : {AuctionHouse}}, so auction house can read the trusted auction houses
             verification_method = self.trusted_auction_houses[reference_auction_house_name]
-            # verification_method : {AuctionHouse : {AuctionHouse}}
+            # auction house' is any other auction house that is verifying a customer based on the reference of trusted auction houses
+            # verification_method : {AuctionHouse' : {AuctionHouse'}}
             bid_limit = verification_method(customer_name)
-            # customer_name : {Customer : AuctionHouse}, so auction house can read the customer's name
-            # implicitly, we have the information flow from customer's name to auction house's customer list where the customer's bid limit is stored
+            # bid_limit is declassfied for auction house' in the verification phase in the main method.
             if bid_limit is not None:
-                # bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
                 self.add_customer(customer_name, bid_limit)
-                # auction house stores the customer's name and bid limit
+                # auction house' stores the customer's name and bid limit
                 print(f"{customer_name} has been accepted with a bid limit of {bid_limit} based on their status from {reference_auction_house_name}.")
             else:
                 print(f"{customer_name} is not a customer of {reference_auction_house_name}.")
@@ -60,8 +56,9 @@ class AuctionHouse:
 
     def print_customers(self):
         for customer in self.customers.values():
-            print(f"Customer: {customer.name}, Bid Limit: {customer.bid_limit}") # customer.name : {Customer : AuctionHouse}, customer.bid_limit : {AuctionHouse : {Customer,AuctionHouse}}
-        # auction house can read the customer's name and bid limit, information flow from customer's name to auction house's customer list, check there exists the same customer, print the customer's name and bid limit
+            print(f"Customer: {customer.name}, Bid Limit: {customer.bid_limit}") 
+            # customer.name : {AuctionHouse : {AuctionHouse}}, customer.bid_limit : {AuctionHouse : {AuctionHouse}}
+       
 
 def main():
 
