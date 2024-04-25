@@ -1,8 +1,8 @@
 class Customer:
-    def __init__(self, name, bid_limit=100):
-        self.name = name #{Customer : AuctionHouse}
-        self.bid_limit = bid_limit #{AuctionHouse : {Customer,AuctionHouse}}
-        self.reference = "" #{AuctionHouse : {Customer,AuctionHouse}}
+    def __init__(self, name, bid_limit=None):
+        self.name = name #{Customer :{Customer,AuctionHouse}}
+        self.bid_limit = bid_limit  #{Customer : {Customer,AuctionHouse}}
+        #self.reference = "" #{AuctionHouse : {Customer,AuctionHouse}}
 
 
 class AuctionHouse:
@@ -11,16 +11,15 @@ class AuctionHouse:
         self.customers = {} #{AuctionHouse : AuctionHouse}
         # Instead of holding auction house objects, we use a mapping of names to verification methods
         self.trusted_auction_houses = {} #{AuctionHouse : {AuctionHouse}}
-        # we seem to miss customer reference, check google docs
-        self.customer_reference = [] #{AuctionHouse : {Customer,AuctionHouse}}
 
-    def add_customer(self, name, bid_limit=100):
-        self.customers[name] = Customer(name, bid_limit) #{Customer : AuctionHouse}.
-        # self.customers[name] : {AuctionHouse : AuctionHouse}
-        # Customer(name, bid_limit) : "name" : {Custome: AuctionHouse},so auctionhouse can read. "bid_limit" : auctionhouse is owner.
+    def add_customer(self, name, bid_limit=None):
+        #if_acts_for(add_customer,Customer)
+        #customer_info := declassify(Customer(),{AuctionHouse})
+        customer_info = Customer(name, bid_limit)
+        self.customers[name] = customer_info  # self.customers[name] : {AuctionHouse : AuctionHouse}
 
     def set_auction_house_trust(self, auction_house_name, verification_method):
-        self.trusted_auction_houses[auction_house_name] = verification_method #{AuctionHouse : {AuctionHouse}}
+        self.trusted_auction_houses[auction_house_name] = verification_method #verification_method : {AuctionHouse' : {AuctionHouse'}} all the customers (and their bid_limit) owned by other auction houses used as the reference
         # auction_house_name : {AuctionHouse : {⊥}}, everyone can read auction house name
         # we use customer's bid limit as verification method, the bid limit : {AuctionHouse : {Customer,AuctionHouse}}, so auction house can read customer's bid limit
 
@@ -83,7 +82,10 @@ def main():
     # Although the auction house name is public, the verification method (bid limit) is private.
     # And essentially, the auction house only knows their owned customer bid limit. therefore, we may also consider the declassification of bid limit from other auction houses
     # B trusts A by specifying A's verification method
-    auction_house_b.set_auction_house_trust("AuctionHouseA", auction_house_a.verify_customer_bid_limit) # {AuctionHouse : {AuctionHouse}}
+    #if_acts_for(main,auction_house_a)
+    #verification := declassify(auction_house_a,{auction_house_n (these are any other auction houses)})
+    verificaition = auction_house_a.verify_customer_bid_limit()
+    auction_house_b.set_auction_house_trust("AuctionHouseA", verificaition) # {AuctionHouse : {AuctionHouse}}
 
     # C trusts B in a similar manner
     auction_house_c.set_auction_house_trust("AuctionHouseB", auction_house_b.verify_customer_bid_limit) # {AuctionHouse : {AuctionHouse}}
