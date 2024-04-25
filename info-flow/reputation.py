@@ -80,7 +80,7 @@ def main():
     # B trusts A by specifying A's verification method
     #if_acts_for(main,auction_house_a)
     #verification := declassify(auction_house_a,{auction_house_n (these are any other auction houses)})
-    verificaition = auction_house_a.verify_customer_bid_limit()
+    verificaition = auction_house_a.verify_customer_bid_limit
     auction_house_b.set_auction_house_trust("AuctionHouseA", verificaition) # {AuctionHouse' : {AuctionHouse'}} auction house prime means other auction houses e.g. auction house b
 
     # C trusts B in a similar manner
