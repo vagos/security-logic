@@ -15,48 +15,69 @@ class AuctionHouse():
 
 
 def doesLiveCustomerRaiseBid(customer, auction_house):
-    # returns customerChoice: { C_L : {⊥ }} 
+    # Initially, customerChoice: { L_C : {}} 
     # Get the data from the Live Customer
     # get choice input from terminal
     if not customer.out:
+        # customer.out : {A:{A}}
         customer_choice = input(f"{customer.name}, do you want to raise the bid? (y/n): ")
+        # if_acts_for(input, {L_C})
+        # customer_choice : = declassify(customer_choice, {⊥})
         if customer_choice == "y":
             if customer.max_bid >= auction_house.current_bid:
+                # auction_house.current_bid : {A:{⊥}}
+                # customer.max_bid : {C:{L_C}}
+                # auction_house.current_bid = {A:{⊥}} 
+                # auction_house.bid_step = {A:{⊥}}
                 auction_house.current_bid += auction_house.bid_step
-                print(f"Auction house bids for {customer.name}: {auction_house.current_bid} Units")
+                print(f"{customer.name} bids : {auction_house.current_bid} Units")
                 customer_choice = True
+                # we have declassfied customer_choice : {C:{⊥}}
             else:
-                print(f"{customer.name} does not have enough money to bid.")
                 customer_choice = False
+                # we have declassfied customer_choice : {C:{⊥}}
         elif customer_choice == "n":
             print(f"{customer.name} does not want to bid.")
             customer_choice = False
-    else:
-        customer_choice = False
-        customer.out = True
-    return customer_choice # { C : {⊥} }
+    return customer_choice # return  { C : {⊥} }
 
 
 def doesCommisionedCustomerRaiseBid(customer, auction_house):
-    doesRaiseBid=False
+    doesRaiseBid=False # {C : {}}  
     if customer.commisioned and customer.max_bid > auction_house.current_bid:
-        auction_house.current_bid += auction_house.bid_step
+        auction_house.current_bid += auction_house.bid_step # reminder : Information flow from low to high, which is fine
         # customer.commisioned = {A:{A}}
-        # commisioned_customer.max_bid = {C:A,C}
-        # current_bid : { A: {A, C_live}}
+        # commisioned_customer.max_bid = {C:{A,C}}
+        # current_bid : { A: {A, L_C}}
+        # customer.commisioned (supremum)customer.max_bid = {{A:{A}} U {C:{A,C}} U  { A: {A, L_C}}}  = {A:{A}}  effective reader ：{A}
+        # auction_house.bid_step = {A:{⊥}}
         print(f"Auction house bids for {customer.name}: {auction_house.current_bid} Units")
+        # if_acts_for(doesCommisionedCustomerRaiseBid, {A})
+        # doesRaiseBid := declassify(doesRaiseBid, {⊥})
         doesRaiseBid = True
     else:
         print(f"Auction house commit bids {customer.name} for {auction_house.current_bid} Units!")
         doesRaiseBid = False
         customer.out = True
+        # customer.out = {A:{A}}
     return doesRaiseBid
 
 def doesRaiseBid(customer, auction_house):
     if customer.commisioned and not customer.out:
+        # customer.commisioned = {A:{A}}
+        # customer.out = {A:{A}}
+        # effective reader : {A}
+        # both customer.commisioned and customer.out are declassified and can be read by everyone 
+        # because at this point, since the bid is raised, even if the commisioned customer is pseudonymized, the auction house can still read the data
+        # if_acts_for(doesRaiseBid, {A})
+        # customer.commisioned : = declassify(customer.commisioned, {⊥})
+        # customer.out : = declassify(customer.out, {⊥})
+        # Since information flow from High to Low, High is the customer.commisioned and customer.out, Low is the choice.So, we need to declassify the customer.commisioned and customer.out
         choice = doesCommisionedCustomerRaiseBid(customer, auction_house)
+        # We have declassfied whether the customers raise the bid or not. choice : {C:{⊥}}
     else:
         choice = doesLiveCustomerRaiseBid(customer, auction_house)
+        # We have declassfied whether the customers raise the bid or not. choice : {C:{⊥}}
     
     return choice
 
