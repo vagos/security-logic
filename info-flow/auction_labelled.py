@@ -3,20 +3,23 @@ class Customer():
         self.name = name  # {C:{}}
         self.max_bid = max_bid  # {C:{}}
         self.commisioned = commisioned  # {C:{}}
-        #self.current_bid = 0  # Not used right now #{C:{A, L_C}}
+        #self.current_bid = 0  # Not used right now #{C:{A, C}}
         self.out = False #{A:{A}}
 
 class AuctionHouse():
     def __init__(self, name, bid_step=50):
         self.name = name  # {A:{⊥}}
         self.customers = []  # {A:{A}}
-        self.current_bid = 0  # {A(on behalf of the comissioned customer?):{A, L_C}}
+        self.current_bid = 0  # {A(on behalf of the comissioned customer?):{A, C}}
         self.bid_step = bid_step  # {A:{⊥}}
 
 
 def doesLiveCustomerRaiseBid(customer, auction_house):
-    # returns customerChoice: { C_L : {⊥ }} 
+    # returns customerChoice: { C : {⊥}} 
+    customerChoice = False
     # Get the data from the Live Customer
+    # if_acts_for(doesLiveCustomerRaiseBid, {C})
+    # customerChoice := declassify(customerChoice, {C:{⊥}})
     return customerChoice # { C : {⊥} }
 
 
@@ -83,24 +86,25 @@ def simulate_auction(auction_house):
             break
             
 
+auction_house = AuctionHouse("Units Auction House")
 
-def main():
+def signup():
 
-    auction_house = AuctionHouse("Units Auction House")
     bidder_a = Customer("Bidder A", 500, commisioned=True)
     bidder_b = Customer("Bidder B", 700, commisioned=True)
     bidder_c = Customer("Bidder C", 1000, commisioned=False)
-    #bidder_n : {C{}, A:{A}}
-    #effective reader
-    #if_acts_for(main, C,A):
-        #bidder_n := declassify(bidder_n, {A:{A},C:{A}})
+    #bidder_n : {C: {}}
+    # Restriction : bidder_n : {C:{}, A:{}}
+    # effective readers: {}
+    #if_acts_for(singup, {C, A}):
+        #bidder_n := declassify(bidder_n, {C:{A}, A: {A}})
+    # effective readers: {A}
     auction_house.customers.extend([bidder_a, bidder_b, bidder_c])  
 
     auction_house.current_bid = 500
     print(f"Starting the auction at {auction_house.current_bid} Units!")
 
-    simulate_auction(auction_house)
 
 
-main()
-
+signup()
+simulate_auction(auction_house)
