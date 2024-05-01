@@ -1,49 +1,49 @@
 class Customer:
     def __init__(self, name, bid_limit=None):
-        self.name = name #{Customer :{Customer,AuctionHouse}}
-        self.bid_limit = bid_limit  #{Customer : {Customer,AuctionHouse}}
+        self.name = name #{C :{C,A}}
+        self.bid_limit = bid_limit  #{C : {C,A}}
     
 
 
 class AuctionHouse:
     def __init__(self, name):
-        self.name = name #{AuctionHouse : {⊥}}
-        self.customers = {} #{AuctionHouse : AuctionHouse}
+        self.name = name #{A : {⊥}}
+        self.customers = {} #{A : A}
         # Instead of holding auction house objects, we use a mapping of names to verification methods
-        self.trusted_auction_houses = {} #{AuctionHouse : {AuctionHouse}}
+        self.trusted_auction_houses = {} #{A : {A}}
 
     def add_customer(self, name, bid_limit=None):
-        #if_acts_for(add_customer,Customer)
-        #customer_info := declassify(Customer(),{AuctionHouse})
+        #if_acts_for(add_customer,C)
+        #customer_info := declassify(C(),{A})
         customer_info = Customer(name, bid_limit)
-        self.customers[name] = customer_info  # self.customers[name] : {AuctionHouse : AuctionHouse}
+        self.customers[name] = customer_info  # self.customers[name] : {A : A}
 
     def set_auction_house_trust(self, auction_house_name, verification_method):
         self.trusted_auction_houses[auction_house_name] = verification_method 
-        #verification_method : {AuctionHouse' : {AuctionHouse'}} all the customers (and their bid_limit) owned by other trusted auction houses used as the reference
-        # auction_house_name : {AuctionHouse : {⊥}}, everyone can read auction house name
-        # we use customer's bid limit as verification method, the bid limit : {AuctionHouse : {Customer,AuctionHouse}}, so auction house can read customer's bid limit
+        #verification_method : {A' : {A'}} all the customers (and their bid_limit) owned by other trusted auction houses used as the reference
+        # auction_house_name : {A : {⊥}}, everyone can read auction house name
+        # we use customer's bid limit as verification method, the bid limit : {A : {C,A}}, so auction house can read customer's bid limit
 
 
     def verify_customer_bid_limit(self, customer_name):
-        # customer_name : {Customer : {Customer,AuctionHouse}}
-        # self.customers[customer_name].bid_limit : {AuctionHouse' : {Customer,AuctionHouse'}}
+        # customer_name : {C : {C,A}}
+        # self.customers[customer_name].bid_limit : {A' : {C,A'}}
         # This step involves some auction house reading customers' bid_limit from other trusted auction houses, which is declassified in the main method.
         if customer_name in self.customers:
-            return self.customers[customer_name].bid_limit #{AuctionHouse' : {AuctionHouse'}}
+            return self.customers[customer_name].bid_limit #{A' : {A'}}
         else:
-            return None # {AuctionHouse' : {AuctionHouse'}}
+            return None # {A' : {A'}}
 
     def accept_customer_with_reference(self, customer_name, reference_auction_house_name):
-        # customer_name : {Customer : {Customer,AuctionHouse}}
-        # reference_auction_house_name : {AuctionHouse' : {AuctionHouse'}}
-        # self.trusted_auction_houses : {AuctionHouse' : {AuctionHouse'}}
-        # verification_method : {AuctionHouse : {AuctionHouse}}
-        # bid_limit : {AuctionHouse' : {Customer,AuctionHouse'}}
+        # customer_name : {C : {C,A}}
+        # reference_auction_house_name : {A' : {A'}}
+        # self.trusted_auction_houses : {A' : {A'}}
+        # verification_method : {A : {A}}
+        # bid_limit : {A' : {C,A'}}
         if reference_auction_house_name in self.trusted_auction_houses:
             verification_method = self.trusted_auction_houses[reference_auction_house_name]
             # auction house' is any other auction house that is verifying a customer based on the reference of trusted auction houses
-            # verification_method : {AuctionHouse' : {AuctionHouse'}}
+            # verification_method : {A' : {A'}}
             bid_limit = verification_method(customer_name)
             # bid_limit is declassfied for auction house' in the verification phase in the main method.
             if bid_limit is not None:
@@ -58,19 +58,19 @@ class AuctionHouse:
     def print_customers(self):
         for customer in self.customers.values():
             print(f"Customer: {customer.name}, Bid Limit: {customer.bid_limit}") 
-            # customer.name : {AuctionHouse : {AuctionHouse}}, customer.bid_limit : {AuctionHouse : {AuctionHouse}}
+            # customer.name : {A : {A}}, customer.bid_limit : {A : {A}}
        
 
 def main():
 
     # Setup
 
-    auction_house_a = AuctionHouse("AuctionHouseA") # {AuctionHouse : {Customer,AuctionHouse}}
-    auction_house_b = AuctionHouse("AuctionHouseB") # {AuctionHouse : {Customer,AuctionHouse}}
-    auction_house_c = AuctionHouse("AuctionHouseC") # {AuctionHouse : {Customer,AuctionHouse}}
+    auction_house_a = A("AA") # {A : {C,A}}
+    auction_house_b = A("AB") # {A : {C,A}}
+    auction_house_c = A("AC") # {A : {C,A}}
 
     auction_house_a.add_customer("Alice", 500) 
-    #customer name : {Customer : {Customer,AuctionHouse}},customer bid_limit : {Customer : {Customer,AuctionHouse}} 
+    #customer name : {C : {C,A}},customer bid_limit : {C : {C,A}} 
 
     # solved for now : can explain the report, and then delete the comment. 
     # With regard to the trust auction house, each auction house trusts the other auction house. 
@@ -81,10 +81,10 @@ def main():
     #if_acts_for(main,auction_house_a)
     #verification := declassify(auction_house_a,{auction_house_n (these are any other auction houses)})
     verificaition = auction_house_a.verify_customer_bid_limit
-    auction_house_b.set_auction_house_trust("AuctionHouseA", verificaition) # {AuctionHouse' : {AuctionHouse'}} auction house prime means other auction houses e.g. auction house b
+    auction_house_b.set_auction_house_trust("AA", verificaition) # {A' : {A'}} auction house prime means other auction houses e.g. auction house b
 
     # C trusts B in a similar manner
-    auction_house_c.set_auction_house_trust("AuctionHouseB", auction_house_b.verify_customer_bid_limit) # {AuctionHouse' : {AuctionHouse'}}
+    auction_house_c.set_auction_house_trust("AB", auction_house_b.verify_customer_bid_limit) # {A' : {A'}}
 
     # Verifying Alice's bid limit through references
     # The following method is run by auction house prime
@@ -94,8 +94,8 @@ def main():
     auction_house_b.accept_customer_with_reference("Bob", "AuctionHouseA")
 
     # auction house prints their customer's reference
-    auction_house_b.print_customers()   # {AuctionHouse : {AuctionHouse}}
-    auction_house_c.print_customers()   # {AuctionHouse : {AuctionHouse}}
+    auction_house_b.print_customers()   # {A : {A}}
+    auction_house_c.print_customers()   # {A : {A}}
 
 main()
 
