@@ -14,10 +14,9 @@ class AuctionHouse():
         self.bid_step = bid_step  # {A:{⊥}}
 
 
-def doesLiveCustomerRaiseBid(customer, auction_house):
-    # returns customerChoice: { C : {⊥}}
-    customerChoice = False
-    # Get the data from the Live Customer
+def doesLiveCustomerRaiseBid():
+    customerChoice = False # { C : {} }
+    # Get the data on behalf of Live Customer
     # if_acts_for(doesLiveCustomerRaiseBid, {C})
     # customerChoice := declassify(customerChoice, {C:{⊥}})
     return customerChoice  # { C : {⊥} }
@@ -38,7 +37,7 @@ def doesRaiseBid(customer, auction_house):
     if customer.commisioned:
         choice = doesCommisionedCustomerRaiseBid(customer, auction_house)
     else:
-        choice = doesLiveCustomerRaiseBid(customer, auction_house)
+        choice = doesLiveCustomerRaiseBid()
 
     return choice
 
