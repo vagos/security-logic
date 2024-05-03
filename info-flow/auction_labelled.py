@@ -3,7 +3,6 @@ class Customer():
         self.name = name  # {C:{}}
         self.max_bid = max_bid  # {C:{}}
         self.commisioned = commisioned  # {C:{}}
-        # self.current_bid = 0  # Not used right now #{C:{A, C}}
 
 
 class AuctionHouse():
@@ -83,14 +82,6 @@ def simulateAuction(auction_house):
             # the winner is declassified because it was owned by both the auction house and customer. The effective reader was only the auction house
             break
 
-
-auction_house = AuctionHouse("Units Auction House")
-
-bidder_a = Customer("Bidder A", 500, commisioned=True)
-bidder_b = Customer("Bidder B", 700, commisioned=True)
-bidder_c = Customer("Bidder C", 1000, commisioned=False)
-
-
 def doSignUp(customer, auction_house):
     # returns None {}
     # customer : {C: {}}
@@ -105,6 +96,10 @@ def doSignUp(customer, auction_house):
     auction_house.current_bid = 500
     print(f"Starting the auction at {auction_house.current_bid} Units!")
 
+auction_house = AuctionHouse("Units Auction House")
+bidder_a = Customer("Bidder A", 500, commisioned=True)
+bidder_b = Customer("Bidder B", 700, commisioned=True)
+bidder_c = Customer("Bidder C", 1000, commisioned=False)
 
 doSignUp(bidder_a, auction_house)
 simulateAuction(auction_house)
